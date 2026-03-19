@@ -19,11 +19,21 @@ class BookResource:
 
     async def on_put(self, req, resp, book_id):
         """Handles PUT requests to update a single book"""
-        pass
+        data = await req.media
+        data = validate_book_data(data)
+        result = self.db.books.update_one({'_id': ObjectId(book_id)}, {'$set': data})
+        if result.matched_count:
+            resp.status = falcon.HTTP_200
+        else:
+            resp.status = falcon.HTTP_404
 
     async def on_delete(self, req, resp, book_id):
         """Handles DELETE requests to delete a single book"""
-        pass
+        result = self.db.books.delete_one({'_id': ObjectId(book_id)})
+        if result.deleted_count:
+            resp.status = falcon.HTTP_200
+        else:
+            resp.status = falcon.HTTP_404
 
 
 class BooksResource:

@@ -33,8 +33,8 @@ i.e.:
 ```
 docker run --name mongodb -d -p 27017:27017 mongo
 ```
-Once your API service is running (see step above), run the populate script
+Once your API service is running (see step above), run the populate option
+By default it will populate it by reading books.csv under data directory
 ```
-cd data/
-python populate.py
+ython client.py load
 ```

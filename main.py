@@ -13,7 +13,7 @@ class LoggingMiddleware:
         logger.info(f"Request: {req.method} {req.uri}")
 
     async def process_response(self, req, resp, resource, req_succeeded):
-        logger.info(f"Response: {resp.status} for {req.method} {req.uri}")
+        logger.info(f"Response debug: {resp.status} for {req.method} {req.uri}")
 
 
 # Initialize MongoDB client and database
