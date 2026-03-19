@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
+import logging
+
 import falcon
 from bson.objectid import ObjectId
 
+# Set logger
+log = logging.getLogger()
+log.setLevel('INFO')
+handler = logging.FileHandler('books.log')
+handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+log.addHandler(handler)
 
 class BookResource:
     def __init__(self, db):
@@ -14,8 +22,10 @@ class BookResource:
             book['_id'] = str(book['_id'])
             resp.media = book
             resp.status = falcon.HTTP_200
+            log.info(f"Book with id {book_id} retrieved successfully")
         else:
             resp.status = falcon.HTTP_404
+            log.warning(f"Book with id {book_id} not found")
 
     async def on_put(self, req, resp, book_id):
         """Handles PUT requests to update a single book"""
@@ -24,16 +34,20 @@ class BookResource:
         result = self.db.books.update_one({'_id': ObjectId(book_id)}, {'$set': data})
         if result.matched_count:
             resp.status = falcon.HTTP_200
+            log.info(f"Book with id {book_id} updated successfully")
         else:
             resp.status = falcon.HTTP_404
+            log.warning(f"Book with id {book_id} not found")
 
     async def on_delete(self, req, resp, book_id):
         """Handles DELETE requests to delete a single book"""
         result = self.db.books.delete_one({'_id': ObjectId(book_id)})
         if result.deleted_count:
             resp.status = falcon.HTTP_200
+            log.info(f"Book with id {book_id} deleted successfully")
         else:
             resp.status = falcon.HTTP_404
+            log.warning(f"Book with id {book_id} not found")
 
 
 class BooksResource:
@@ -46,6 +60,7 @@ class BooksResource:
         query = {}
         if rating is not None:
             query['average_rating'] = {'$gte': rating}
+            log.info(f"Retrieving books with average rating >= {rating}")
 
         books = self.db.books.find(query)
         books_list = []
@@ -54,6 +69,7 @@ class BooksResource:
             books_list.append(book)
         resp.media = books_list
         resp.status = falcon.HTTP_200
+        log.info(f"{len(books_list)} books retrieved successfully")
 
     async def on_post(self, req, resp):
         """Handles POST requests to add a new book"""
@@ -63,8 +79,9 @@ class BooksResource:
         data['_id'] = str(result.inserted_id)
         resp.media = data
         resp.status = falcon.HTTP_201
+        log.info(f"Book {data['title']} created with id {data['_id']}")
 
-   
+
 book_types = {
     "title": str,
     "authors": list,
@@ -81,7 +98,7 @@ book_types = {
 
 def validate_book_data(data):
     for property in book_types:
-        if property not in data: 
+        if property not in data:
             raise falcon.HTTPBadRequest(f"Invalid data: {property} is required.")
         if book_types[property] != str:
             try:

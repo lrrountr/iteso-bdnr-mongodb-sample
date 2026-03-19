@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import csv
-import logging
 import os
 import requests
 
-
-# Set logger
-log = logging.getLogger()
-log.setLevel('INFO')
-handler = logging.FileHandler('books.log')
-handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-log.addHandler(handler)
 
 # Read env vars related to API connection
 BOOKS_API_URL = os.getenv("BOOKS_API_URL", "http://localhost:8000")
@@ -111,8 +103,6 @@ def delete_book(id):
 
 
 def main():
-    log.info(f"Welcome to books catalog. App requests to: {BOOKS_API_URL}")
-
     parser = argparse.ArgumentParser()
 
     list_of_actions = ["load", "search", "get", "update", "delete"]
@@ -126,11 +116,11 @@ def main():
     args = parser.parse_args()
 
     if args.id and not args.action in ["get", "update", "delete"]:
-        log.error(f"Can't use arg id with action {args.action}")
+        print(f"ERROR: Can't use arg id with action {args.action}")
         exit(1)
 
     if args.rating and args.action != "search":
-        log.error(f"Rating arg can only be used with search action")
+        print(f"ERROR: Rating arg can only be used with search action")
         exit(1)
 
     if args.action == "load":
